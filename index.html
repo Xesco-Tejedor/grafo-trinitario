@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Grafo trinitario · TFM preservación del software español de 8 bits</title>
+<meta name="description" content="Navegador visual de la Arquitectura Trinitaria de 3 Nodos (Obra/AIP, Hardware Z80, Periférico CRT) y su relación conceptual con datos.bne.es.">
+<meta name="theme-color" content="#14100e">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#14100e;--panel:#1d1714;--line:#3a2c27;--amber:#ffb800;--wine:#8a2a3c;--wine2:#c0485f;--txt:#f3e9dc;--mut:#b7a595;--ok:#7bd88f}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:"Space Grotesk",system-ui,sans-serif;overflow:hidden}
+header{position:fixed;top:0;left:0;right:0;z-index:5;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;background:linear-gradient(var(--bg) 70%,transparent)}
+h1{font-size:16px;margin:0 0 6px;color:var(--amber);letter-spacing:.02em}h1 small{color:var(--mut);font-weight:400;font-size:12px;display:block}
+.bar{display:flex;gap:6px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}.bar>*{flex:none}
+button,.chip{font:inherit;font-size:12px;color:var(--txt);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 11px;cursor:pointer}
+button:active{transform:scale(.97)}.chip{display:inline-flex;align-items:center;gap:6px}
+.chip i{width:18px;height:0;border-top:3px solid;display:inline-block}.chip.off{opacity:.35}
+input[type=search]{font:inherit;font-size:13px;background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:999px;padding:6px 12px;width:150px}
+svg{position:fixed;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+.node circle{stroke-width:2;cursor:pointer;filter:drop-shadow(0 0 8px rgba(255,184,0,.25))}
+.node text{fill:var(--txt);font-size:12px;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:#14100e;stroke-width:3px}
+.node.dim{opacity:.18}.node.sel circle{stroke:#fff;stroke-width:3}
+.edge{fill:none;stroke-width:2}.edge.dim{opacity:.08}
+.elabel{fill:var(--mut);font-size:10px;text-anchor:middle;paint-order:stroke;stroke:#14100e;stroke-width:3px;pointer-events:none}
+#panel{position:fixed;left:0;right:0;bottom:0;z-index:6;max-height:46vh;overflow:auto;background:var(--panel);border-top:2px solid var(--amber);padding:12px 14px calc(14px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .25s;box-shadow:0 -8px 30px rgba(0,0,0,.5)}
+#panel.open{transform:none}#panel h2{margin:0 0 2px;font-size:17px;color:var(--amber)}#panel .sub{color:var(--mut);font-size:12px;margin-bottom:8px}
+#panel dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:4px 10px;font-size:13px}#panel dt{color:var(--mut)}#panel dd{margin:0;word-break:break-word}
+.tag{display:inline-block;font-size:11px;border-radius:6px;padding:2px 7px;margin:2px 4px 2px 0;border:1px solid}
+.warn{background:#2a1a10;border:1px solid #6b4a1a;border-radius:8px;padding:8px;font-size:12px;margin-top:8px;color:#f0d9a8}
+a{color:var(--amber)}code{font-size:12px;background:#0e0a09;padding:1px 4px;border-radius:4px;word-break:break-all}
+#close{position:absolute;right:10px;top:8px}
+#guide{position:fixed;inset:0;z-index:9;background:rgba(10,7,6,.88);display:none;align-items:center;justify-content:center;padding:16px}
+#guide.open{display:flex}#guide .box{background:var(--panel);border:1px solid var(--amber);border-radius:14px;max-width:460px;max-height:88vh;overflow:auto;padding:18px}
+#guide h2{margin:0 0 8px;color:var(--amber);font-size:18px}#guide p,#guide li{font-size:14px;line-height:1.45}#guide ul{padding-left:18px}
+#zoom{position:fixed;right:10px;top:50%;z-index:5;display:flex;flex-direction:column;gap:6px;transform:translateY(-50%)}#zoom button{width:38px;height:38px;border-radius:10px;font-size:18px;padding:0}
+#count{position:fixed;left:12px;bottom:8px;z-index:4;font-size:11px;color:var(--mut)}
+</style>
+</head>
+<body>
+<header>
+<h1>Grafo trinitario <small>TFM · preservación forense del software español de 8 bits · modelo propuesto para la BNE</small></h1>
+<div class="bar" id="filters" style="flex-wrap:wrap;overflow:visible"></div>
+<div class="bar" style="margin-top:6px"><input type="search" id="q" placeholder="Buscar…" aria-label="Buscar nodo" style="width:100px"><button id="reset">Recolocar</button><button id="exp">JSON-LD</button><button id="help">? Guía</button></div>
+</header>
+<svg id="svg" aria-label="Grafo semántico"><g id="vp"><g id="edges"></g><g id="nodes"></g></g></svg>
+<div id="zoom"><button id="zi" aria-label="Acercar">+</button><button id="zo" aria-label="Alejar">−</button><button id="zf" aria-label="Encajar">⌖</button></div>
+<div id="count"></div>
+<aside id="panel" aria-live="polite"></aside>
+<div id="guide"><div class="box">
+<h2>Cómo leer este grafo</h2>
+<p>Muestra la <b>Arquitectura Trinitaria de 3 Nodos</b> del TFM (apartado 8.4): <b>A</b> Obra/Software (AIP), <b>B</b> Hardware Z80 y temporización, <b>C</b> Periférico/Visualización CRT, más las tres obras de la prueba de concepto.</p>
+<ul>
+<li><b>Toca un nodo</b> para ver sus datos y su procedencia. Arrastra para moverlo; arrastra el fondo para desplazarte; usa + − ⌖ para el zoom.</li>
+<li>Cada <b>enlace tiene un color</b> según su estatus. Los filtros de arriba los muestran u ocultan.</li>
+<li><span style="color:#ffb800">Ámbar</span>: relación que el TFM afirma. <span style="color:#c0485f">Burdeos discontinuo</span>: URI que figura en el TFM pero que <b>no he podido verificar</b>. <span style="color:#7bd88f">Verde</span>: identificador de la ontología de la BNE (datos.bne.es/def) que sí existe. <span style="color:#9aa7ff">Azul discontinuo</span>: correspondencia conceptual propuesta aquí, <b>no publicada por la BNE</b>.</li>
+<li>«Exportar JSON-LD» descarga el modelo con el estatus de cada relación.</li>
+</ul>
+<p><b>Límites:</b> es un modelo estático derivado del TFM, no una consulta en vivo a datos.bne.es. Funciona sin conexión (salvo la tipografía) y no envía datos a ningún servidor.</p>
+<button id="gok" style="background:var(--amber);color:#14100e;border-color:var(--amber);font-weight:700">Entendido</button>
+</div></div>
+<script>
+const KINDS={tfm:{n:"Afirmado en el TFM",s:"TFM",c:"#ffb800",d:""},uri:{n:"URI del TFM (no verificada)",s:"URI sin verificar",c:"#c0485f",d:"7 5"},bne:{n:"Identificador BNE verificado",s:"BNE verificado",c:"#7bd88f",d:""},con:{n:"Correspondencia conceptual propuesta",s:"Conceptual",c:"#9aa7ff",d:"3 5"}};
+const DEF="http://datos.bne.es/def/";
+const SRC_TFM="TFMv34, ";
+const N=[
+{id:"A",l:"Nodo A · Obra / AIP",t:"core",r:34,c:"#ffb800",sub:"Representación del AIP",p:[["Contenido","Representación del AIP con firma SHA-256 e identificación PRONOM"],["PRONOM en §8.4 y anexo 11","fmt/1000"],["PRONOM en tabla 12.1","fmt/802 (TZX, 44,1 kHz / 16 bit)"]],w:"El TFM da dos PUID distintos para el mismo formato (fmt/1000 en 8.4 y XML; fmt/802 en la tabla 12.1). Conviene unificarlos antes de depositar.",s:"TFM §8.4, §11, §12.1"},
+{id:"B",l:"Nodo B · Hardware Z80 / temporización",t:"core",r:34,c:"#ff8a00",sub:"Descripción normalizada del entorno",p:[["CPU","Zilog Z80A a 3,546900 MHz"],["VRAM","$4000-$5AFF (contención)"],["Entorno de ejemplo (anexo 11)","Sinclair ZX Spectrum 128K +2B, revisión Amstrad 1989"],["Chip","Amstrad Gate Array (ASIC 40085)"],["Bancos contendidos","4, 5, 6, 7"]],w:"El apartado 6.2 menciona bancos del «+2A» y el anexo 11 modela un «+2B». El modelo conserva ambas lecturas sin resolverlas.",s:"TFM §6.2, §8.4, §11"},
+{id:"C",l:"Nodo C · Periférico CRT",t:"core",r:34,c:"#c0485f",sub:"Perfil de salida gráfica",p:[["Perfil","Monitor CRT analógico RGB frente a monitor de telemetría"]],s:"TFM §8.4"},
+{id:"W1",l:"La Pulga (1983)",t:"obra",r:20,c:"#ffd36b",sub:"Paco Suárez / Paco Portalo · Indescomp",p:[["ID en el TFM","la-pulga-1983"],["Archivo","La Pulga.tzx · 30.538 bytes"],["SHA-256","AEF4A6021586E2EE99D435E818C61F1855AEDAEFB69EE46D8F75BD5ECCE1EC30"],["Calculado","29/09/2026 11:38:48 UTC"],["Estatus jurídico (TFM)","Productora extinta; autores vivos; donación voluntaria u obra huérfana"],["Origen del archivo","Computer Emuzone"]],s:"TFM §6.1, §6.4.1, §12.1"},
+{id:"W2",l:"Sir Fred (1986)",t:"obra",r:20,c:"#ffd36b",sub:"Made in Spain",p:[["ID en el TFM","sir-fred-1986"],["Archivo","Sir Fred.tzx · 50.401 bytes"],["SHA-256","BD17E6281A7E6B6DFB1B4C9D529871B04D1163CE9A280F0BCFD893D0BAB54E52"],["Calculado","29/09/2026 11:40:05 UTC"],["Estatus jurídico (TFM)","Autores vivos: cesión de licencias para consulta in situ y emulación"],["Origen del archivo","Computer Emuzone"]],s:"TFM §6.2, §6.4.1, §11, §12.1"},
+{id:"W3",l:"La Abadía del Crimen (1987)",t:"obra",r:20,c:"#ffd36b",sub:"Paco Menéndez / Juan Delcán · Opera Soft",p:[["ID en el TFM","la-abadia-del-crimen-1987"],["Archivo","La Abadia del Crimen.tzx · 99.418 bytes"],["SHA-256","DD2791FEFBB77A45B63DE545AE0DF5FF647E426F952B6F51AFB7BE3901DB6C3C"],["Calculado","29/09/2026 11:40:05 UTC"],["Estatus jurídico (TFM)","Caso principal de obra huérfana ante la EUIPO"],["Origen del archivo","Computer Emuzone"]],s:"TFM §6.3, §6.4.1, §12.1"},
+{id:"U",l:"URI propuesta · sir-fred-1986",t:"uri",r:17,c:"#c0485f",sub:"datos.bne.es/recurso/aip/sir-fred-1986",p:[["URI","https://datos.bne.es/recurso/aip/sir-fred-1986"],["Estatus","Aparece solo en el XML PREMIS de ejemplo del TFM (anexo 11)"]],w:"No he podido comprobar que esta URI exista ni que la BNE publique recursos AIP bajo esa ruta. Los registros publicados que he encontrado usan /resource/XX… y /obra/XX… . Trátala como identificador propuesto, no como dato de la BNE.",s:"TFM §11"},
+{id:"O",l:"BNE · Obra (C1001)",t:"bne",r:17,c:"#7bd88f",sub:"Clase de la ontología BNE",p:[["IRI",DEF+"C1001"],["Definición","Creación intelectual o artística diferenciada (entidad abstracta, basada en IFLA LRM)"]],s:"datos.bne.es/def",u:"https://datos.bne.es/def/index-es.html"},
+{id:"E",l:"BNE · Expresión (C1002)",t:"bne",r:17,c:"#7bd88f",sub:"Clase de la ontología BNE",p:[["IRI",DEF+"C1002"]],s:"datos.bne.es/def",u:"https://datos.bne.es/def/index-es.html"},
+{id:"I",l:"BNE · Ejemplar (C1004)",t:"bne",r:17,c:"#7bd88f",sub:"Clase de la ontología BNE",p:[["IRI",DEF+"C1004"]],s:"datos.bne.es/def",u:"https://datos.bne.es/def/index-es.html"},
+{id:"P",l:"BNE · Entidad corporativa (C1006)",t:"bne",r:17,c:"#7bd88f",sub:"Clase de la ontología BNE",p:[["IRI",DEF+"C1006"]],s:"datos.bne.es/def",u:"https://datos.bne.es/def/index-es.html"}
+];
+const L=[
+["A","B","tfm","especificación de entorno por URI","El TFM propone que Nodo A y Nodo B se desacoplen mediante URIs, de modo que miles de títulos compartan la misma especificación de entorno (§8.4)."],
+["A","C","tfm","perfil de visualización","Los tres nodos son independientes y se enlazan por URIs (§8.4)."],
+["B","C","tfm","salida gráfica","Los tres nodos se enlazan por URIs (§8.4). El detalle de esta relación concreta no está desarrollado en el TFM."],
+["A","W1","tfm","incluye obra","La prueba de concepto documenta el Gate 1 (fixity) de las tres obras (§6.4)."],
+["A","W2","tfm","incluye obra","Ídem; el anexo 11 lo modela como representación PREMIS."],
+["A","W3","tfm","incluye obra","Ídem."],
+["W2","U","uri","identificador propuesto","objectIdentifier de tipo URI en el XML PREMIS del anexo 11. No verificado."],
+["W2","B","tfm","environmentInformation","El XML del anexo 11 asocia Sir Fred al Spectrum 128K +2B, Z80A 3,546900 MHz, bancos 4-7."],
+["A","O","con","Nodo A ≈ Obra","Lectura propuesta en esta herramienta: el AIP describe una obra de software. La BNE no publica esta correspondencia."],
+["A","E","con","≈ Expresión","Lectura propuesta: el archivo .tzx como realización de la obra. No publicada por la BNE."],
+["A","I","con","≈ Ejemplar","Lectura propuesta: el fichero concreto con su hash. No publicada por la BNE."],
+["W1","P","con","productora ≈ ent. corporativa","Indescomp (también Opera Soft y Made in Spain) como entidad corporativa. Lectura propuesta, no publicada por la BNE."],
+["O","E","bne","realizada a través de","Relación del modelo IFLA LRM en el que se basa la ontología BNE (Obra se realiza en Expresión). Referencia a la definición, no a un registro concreto."],
+["E","I","bne","materializada en","Cadena Obra, Expresión y Ejemplar de la ontología BNE; las clases están definidas en datos.bne.es/def."]
+];
+const byId=Object.fromEntries(N.map(n=>[n.id,n]));
+const NS="http://www.w3.org/2000/svg",svg=document.getElementById("svg"),vp=document.getElementById("vp"),gE=document.getElementById("edges"),gN=document.getElementById("nodes"),panel=document.getElementById("panel");
+const on=new Set(Object.keys(KINDS));let sel=null,view={x:0,y:0,k:1};
+function el(n,a,p){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function W(){return innerWidth}function H(){return innerHeight}
+function layout(){const w=W(),h=H(),cx=w/2,cy=h/2+10,R=Math.min(w,h)*.3;
+const py=H()>W()?1.5:1;const pos={A:[cx-R*.9,cy-R*.1*py],B:[cx+R*.9,cy-R*.1*py],C:[cx,cy+R*.85*py],W1:[cx-R*1.7,cy-R*.9],W2:[cx-R*.5,cy-R*1.1],W3:[cx-R*1.7,cy+R*.5],U:[cx+R*.3,cy-R*1.3],O:[cx-R*.9,cy+R*1.1],E:[cx-R*1.7,cy+R*1.3],I:[cx-R*.3,cy+R*1.5],P:[cx-R*2.1,cy-R*.2]};
+N.forEach(n=>{[n.x,n.y]=pos[n.id];n.vx=0;n.vy=0})}
+const eEls=[],nEls={};
+L.forEach((e,i)=>{const k=KINDS[e[2]];const p=el("path",{class:"edge",stroke:k.c,"stroke-dasharray":k.d},gE);const t=el("text",{class:"elabel"},gE);t.textContent=e[3];const hit=el("path",{fill:"none",stroke:"transparent","stroke-width":16,style:"cursor:pointer"},gE);hit.onclick=ev=>{ev.stopPropagation();showEdge(i)};eEls.push({p,t,hit,e})});
+N.forEach(n=>{const g=el("g",{class:"node",tabindex:0,role:"button","aria-label":n.l},gN);el("circle",{r:n.r,fill:n.c+"33",stroke:n.c},g);const words=n.l.split(" · ");const t=el("text",{y:n.r+14},g);
+if(words.length>1){t.textContent=words[0];const t2=el("text",{y:n.r+27},g);t2.textContent=words[1]}else t.textContent=n.l;
+if(n.t==="core"){const c=el("text",{y:5,style:"font-size:16px;font-weight:700;fill:#ffb800;stroke:none"},g);c.textContent=n.id}
+let drag=null,moved=0;g.addEventListener("pointerdown",ev=>{ev.stopPropagation();g.setPointerCapture(ev.pointerId);drag={x:ev.clientX,y:ev.clientY};moved=0});
+g.addEventListener("pointermove",ev=>{if(!drag)return;const dx=(ev.clientX-drag.x)/view.k,dy=(ev.clientY-drag.y)/view.k;moved+=Math.abs(dx)+Math.abs(dy);n.x+=dx;n.y+=dy;drag={x:ev.clientX,y:ev.clientY};draw()});
+g.addEventListener("pointerup",()=>{drag=null;if(moved<6)select(n.id)});g.addEventListener("keydown",ev=>{if(ev.key==="Enter")select(n.id)});nEls[n.id]=g});
+function edgePath(a,b,i){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;const x1=a.x+ux*a.r,y1=a.y+uy*a.r,x2=b.x-ux*b.r,y2=b.y-uy*b.r;const off=((i%3)-1)*14;const mx=(x1+x2)/2-uy*off,my=(y1+y2)/2+ux*off;return{d:`M${x1},${y1} Q${mx},${my} ${x2},${y2}`,mx:(x1+x2+2*mx)/4,my:(y1+y2+2*my)/4}}
+function connected(id){const s=new Set([id]);L.forEach(e=>{if(e[0]===id)s.add(e[1]);if(e[1]===id)s.add(e[0])});return s}
+function draw(){vp.setAttribute("transform",`translate(${view.x},${view.y}) scale(${view.k})`);const q=document.getElementById("q").value.trim().toLowerCase();const nb=sel?connected(sel):null;
+eEls.forEach((o,i)=>{const [a,b,k]=o.e,pa=edgePath(byId[a],byId[b],i);o.p.setAttribute("d",pa.d);o.hit.setAttribute("d",pa.d);o.t.setAttribute("x",pa.mx);o.t.setAttribute("y",pa.my-4);const vis=on.has(k);const disp=vis?"":"none";o.p.style.display=o.t.style.display=o.hit.style.display=disp;o.p.classList.toggle("dim",!!(nb&&!(a===sel||b===sel)))});
+N.forEach(n=>{const g=nEls[n.id];g.setAttribute("transform",`translate(${n.x},${n.y})`);const hidden=!L.some(e=>on.has(e[2])&&(e[0]===n.id||e[1]===n.id))&&n.t!=="core";g.style.display=hidden?"none":"";const match=!q||n.l.toLowerCase().includes(q)||JSON.stringify(n.p).toLowerCase().includes(q);g.classList.toggle("dim",!match||!!(nb&&!nb.has(n.id)));g.classList.toggle("sel",n.id===sel)});
+const vn=N.filter(n=>nEls[n.id].style.display!=="none").length,ve=L.filter(e=>on.has(e[2])).length;document.getElementById("count").textContent=`${vn} nodos · ${ve} relaciones visibles`}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function linkify(v){return /^https?:/.test(v)?`<code>${esc(v)}</code>`:esc(v)}
+function select(id){sel=id;const n=byId[id];const rel=L.filter(e=>e[0]===id||e[1]===id).map(e=>{const o=byId[e[0]===id?e[1]:e[0]];const k=KINDS[e[2]];return `<span class="tag" style="color:${k.c};border-color:${k.c}">${esc(e[3])} → ${esc(o.l)}</span>`}).join("");
+panel.innerHTML=`<button id="close">Cerrar</button><h2>${esc(n.l)}</h2><div class="sub">${esc(n.sub)}</div><dl>${n.p.map(r=>`<dt>${esc(r[0])}</dt><dd>${linkify(r[1])}</dd>`).join("")}<dt>Fuente</dt><dd>${esc(n.s)}${n.u?` · <a href="${n.u}" target="_blank" rel="noopener">abrir ontología BNE</a>`:""}</dd></dl>${n.w?`<div class="warn">⚠ ${esc(n.w)}</div>`:""}<div style="margin-top:8px">${rel}</div>`;panel.classList.add("open");document.getElementById("close").onclick=()=>{sel=null;panel.classList.remove("open");draw()};draw()}
+function showEdge(i){const e=L[i],k=KINDS[e[2]];sel=null;panel.innerHTML=`<button id="close">Cerrar</button><h2>${esc(byId[e[0]].l)} → ${esc(byId[e[1]].l)}</h2><div class="sub"><span class="tag" style="color:${k.c};border-color:${k.c}">${k.n}</span> ${esc(e[3])}</div><p style="font-size:13px;margin:6px 0">${esc(e[4])}</p>`;panel.classList.add("open");document.getElementById("close").onclick=()=>{panel.classList.remove("open")};draw()}
+const fb=document.getElementById("filters");Object.keys(KINDS).forEach(k=>{const b=document.createElement("button");b.className="chip";b.innerHTML=`<i style="border-color:${KINDS[k].c};border-top-style:${KINDS[k].d?"dashed":"solid"}"></i>${KINDS[k].s}`;b.onclick=()=>{on.has(k)?on.delete(k):on.add(k);b.classList.toggle("off",!on.has(k));draw()};fb.appendChild(b)});
+document.getElementById("q").oninput=draw;
+function fit(){const vs=N.filter(n=>nEls[n.id].style.display!=="none");const xs=vs.map(n=>n.x),ys=vs.map(n=>n.y);const x0=Math.min(...xs)-95,x1=Math.max(...xs)+95,y0=Math.min(...ys)-60,y1=Math.max(...ys)+80;const top=125,k=Math.min(W()/(x1-x0),(H()-top-20)/(y1-y0),1.4);view.k=k;view.x=(W()-(x1-x0)*k)/2-x0*k;view.y=top+(H()-top-20-(y1-y0)*k)/2-y0*k;draw()}
+document.getElementById("reset").onclick=()=>{layout();sel=null;panel.classList.remove("open");draw();fit()};
+function zoom(f,cx=W()/2,cy=H()/2){const nk=Math.min(3,Math.max(.3,view.k*f));view.x=cx-(cx-view.x)*(nk/view.k);view.y=cy-(cy-view.y)*(nk/view.k);view.k=nk;draw()}
+zi.onclick=()=>zoom(1.25);zo.onclick=()=>zoom(.8);zf.onclick=fit;svg.addEventListener("wheel",e=>{e.preventDefault();zoom(e.deltaY<0?1.1:.9,e.clientX,e.clientY)},{passive:false});
+const ptrs=new Map();let pd=0;svg.addEventListener("pointerdown",e=>{ptrs.set(e.pointerId,[e.clientX,e.clientY]);if(ptrs.size===2){const [a,b]=[...ptrs.values()];pd=Math.hypot(a[0]-b[0],a[1]-b[1])}});
+svg.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId))return;const o=ptrs.get(e.pointerId);if(ptrs.size===1&&e.target===svg){view.x+=e.clientX-o[0];view.y+=e.clientY-o[1];draw()}ptrs.set(e.pointerId,[e.clientX,e.clientY]);if(ptrs.size===2){const [a,b]=[...ptrs.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pd)zoom(d/pd,(a[0]+b[0])/2,(a[1]+b[1])/2);pd=d}});
+["pointerup","pointercancel"].forEach(t=>svg.addEventListener(t,e=>{ptrs.delete(e.pointerId);pd=0}));
+svg.addEventListener("click",e=>{if(e.target===svg){sel=null;panel.classList.remove("open");draw()}});
+function jsonld(){return{"@context":{bne:DEF,tfm:"https://xesco-tejedor.github.io/grafo-trinitario/vocab#",rdfs:"http://www.w3.org/2000/01/rdf-schema#"},"@graph":[...N.map(n=>({"@id":"tfm:"+n.id,"rdfs:label":n.l,"tfm:tipo":n.t,"tfm:fuente":n.s,"tfm:propiedades":Object.fromEntries(n.p)})),...L.map((e,i)=>({"@id":"tfm:rel"+(i+1),"tfm:desde":{"@id":"tfm:"+e[0]},"tfm:hacia":{"@id":"tfm:"+e[1]},"rdfs:label":e[3],"tfm:estatus":KINDS[e[2]].n,"rdfs:comment":e[4]}))],"tfm:aviso":"Modelo derivado del TFM. Solo los IRIs bne:C1001, C1002, C1004 y C1006 están verificados en datos.bne.es/def; el resto de relaciones son del modelo o propuestas."}}
+document.getElementById("exp").onclick=()=>{const b=new Blob([JSON.stringify(jsonld(),null,2)],{type:"application/ld+json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="grafo-trinitario.jsonld";document.body.appendChild(a);a.click();a.remove()};
+const gd=document.getElementById("guide");help.onclick=()=>gd.classList.add("open");gok.onclick=()=>{gd.classList.remove("open");try{localStorage.setItem("gt-guide","1")}catch(e){}};
+layout();draw();fit();addEventListener("resize",()=>{layout();draw();fit()});
+try{if(!localStorage.getItem("gt-guide"))gd.classList.add("open")}catch(e){gd.classList.add("open")}
+</script>
+</body>
+</html>
