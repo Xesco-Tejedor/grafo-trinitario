@@ -75,6 +75,7 @@ const N=[
 {id:"O",l:"BNE · Obra C1001",t:"bne",r:17,c:"#7bd88f",sub:"Clase de la ontología BNE",p:[["IRI",DEF+"C1001"],["Definición","Creación intelectual o artística diferenciada (entidad abstracta, basada en IFLA LRM)"]],s:"datos.bne.es/def",u:"https://datos.bne.es/def/index-es.html"},
 {id:"E",l:"BNE · Expresión C1002",t:"bne",r:17,c:"#7bd88f",sub:"Clase de la ontología BNE",p:[["IRI",DEF+"C1002"]],s:"datos.bne.es/def",u:"https://datos.bne.es/def/index-es.html"},
 {id:"I",l:"BNE · Ejemplar C1004",t:"bne",r:17,c:"#7bd88f",sub:"Clase de la ontología BNE",p:[["IRI",DEF+"C1004"]],s:"datos.bne.es/def",u:"https://datos.bne.es/def/index-es.html"},
+{id:"R",l:"BNE · Recurso C1003",t:"bne",r:17,c:"#7bd88f",sub:"Clase de la ontología BNE",p:[["IRI",DEF+"C1003"],["Definición","Entidad tangible o intangible concebida, producida o publicada como una unidad; la materialización física de una expresión (equivalente a Manifestation en IFLA LRM)"]],s:"datos.bne.es/def",u:"https://datos.bne.es/def/index-es.html"},
 {id:"P",l:"BNE · Entidad corp. C1006",t:"bne",r:17,c:"#7bd88f",sub:"Clase de la ontología BNE",p:[["IRI",DEF+"C1006"]],s:"datos.bne.es/def",u:"https://datos.bne.es/def/index-es.html"}
 ];
 const L=[
@@ -90,7 +91,8 @@ const L=[
 ["A","I","con","≈ Ejemplar","Lectura propuesta: el fichero concreto con su hash. No publicada por la BNE."],
 ["W1","P","con","productora ≈ ent. corporativa","Indescomp (también Opera Soft y Made in Spain) como entidad corporativa. Lectura propuesta, no publicada por la BNE."],
 ["O","E","bne","es realizada a través de (OP1002)","Propiedad verificada de la ontología BNE: relaciona una obra con una expresión que la realiza (datos.bne.es/def, OP1002). Es la definición de la propiedad, no un registro concreto."],
-["E","I","con","expresión → ejemplar","En la ontología BNE la expresión «está materializada en» un recurso (OP2001), no directamente en un ejemplar. El eslabón hacia Ejemplar es una lectura propuesta aquí, no publicada por la BNE."]
+["E","R","bne","está materializada en (OP2001)","Propiedad verificada de la ontología BNE: relaciona una expresión con un recurso, esto es, una materialización física de la expresión (datos.bne.es/def, OP2001). Es la definición de la propiedad, no un registro concreto."],
+["R","I","bne","está ejemplificado por (OP3001)","Propiedad verificada de la ontología BNE: relaciona un recurso con un ejemplar concreto que lo contiene (datos.bne.es/def, OP3001). Es la definición de la propiedad, no un registro concreto."]
 ];
 const byId=Object.fromEntries(N.map(n=>[n.id,n]));
 const NS="http://www.w3.org/2000/svg",svg=document.getElementById("svg"),vp=document.getElementById("vp"),gE=document.getElementById("edges"),gN=document.getElementById("nodes"),panel=document.getElementById("panel");
@@ -99,8 +101,8 @@ function el(n,a,p){const e=document.createElementNS(NS,n);for(const k in a)e.set
 function W(){return innerWidth}function H(){return innerHeight}
 const PORT=()=>H()>W()*1.1;
 function layout(){const w=W(),h=H(),cx=w/2,cy=h/2+10,R=Math.min(w,h)*.3;
-if(PORT()){const T={A:[150,190],B:[300,150],C:[300,310],W1:[60,20],W2:[205,25],W3:[75,300],U:[335,45],P:[68,138],O:[75,440],E:[185,520],I:[320,440]};const top=document.querySelector('header').offsetHeight+28,sx=w/390,sy=Math.min(1.25,Math.max(.75,(h-top-45)/580));N.forEach(n=>{n.x=T[n.id][0]*sx;n.y=top+T[n.id][1]*sy;n.vx=0;n.vy=0});return}
-const py=H()>W()?1.5:1;const pos={A:[cx-R*.9,cy-R*.1*py],B:[cx+R*.9,cy-R*.1*py],C:[cx,cy+R*.85*py],W1:[cx-R*1.7,cy-R*.9],W2:[cx-R*.5,cy-R*1.1],W3:[cx-R*1.7,cy+R*.5],U:[cx+R*.3,cy-R*1.3],O:[cx-R*.9,cy+R*1.1],E:[cx-R*1.7,cy+R*1.3],I:[cx-R*.3,cy+R*1.5],P:[cx-R*2.1,cy-R*.2]};
+if(PORT()){const T={A:[150,190],B:[300,150],C:[300,310],W1:[60,20],W2:[205,25],W3:[75,300],U:[335,45],P:[68,138],O:[75,440],E:[185,520],R:[300,565],I:[325,430]};const top=document.querySelector('header').offsetHeight+28,sx=w/390,sy=Math.min(1.25,Math.max(.75,(h-top-45)/580));N.forEach(n=>{n.x=T[n.id][0]*sx;n.y=top+T[n.id][1]*sy;n.vx=0;n.vy=0});return}
+const py=H()>W()?1.5:1;const pos={A:[cx-R*.9,cy-R*.1*py],B:[cx+R*.9,cy-R*.1*py],C:[cx,cy+R*.85*py],W1:[cx-R*1.7,cy-R*.9],W2:[cx-R*.5,cy-R*1.1],W3:[cx-R*1.7,cy+R*.5],U:[cx+R*.3,cy-R*1.3],O:[cx-R*.9,cy+R*1.1],E:[cx-R*1.7,cy+R*1.3],R:[cx-R*.95,cy+R*1.75],I:[cx-R*.3,cy+R*1.5],P:[cx-R*2.1,cy-R*.2]};
 N.forEach(n=>{[n.x,n.y]=pos[n.id];n.vx=0;n.vy=0})}
 const eEls=[],nEls={};
 L.forEach((e,i)=>{const k=KINDS[e[2]];const p=el("path",{class:"edge",stroke:k.c,"stroke-dasharray":k.d},gE);const t=el("text",{class:"elabel"},gE);t.textContent=e[3];const hit=el("path",{fill:"none",stroke:"transparent","stroke-width":16,style:"cursor:pointer"},gE);hit.onclick=ev=>{ev.stopPropagation();showEdge(i)};eEls.push({p,t,hit,e})});
@@ -131,7 +133,7 @@ const ptrs=new Map();let pd=0;svg.addEventListener("pointerdown",e=>{ptrs.set(e.
 svg.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId))return;const o=ptrs.get(e.pointerId);if(ptrs.size===1&&!e.target.closest(".node")){view.x+=e.clientX-o[0];view.y+=e.clientY-o[1];draw()}ptrs.set(e.pointerId,[e.clientX,e.clientY]);if(ptrs.size===2){const [a,b]=[...ptrs.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pd)zoom(d/pd,(a[0]+b[0])/2,(a[1]+b[1])/2);pd=d}});
 ["pointerup","pointercancel"].forEach(t=>svg.addEventListener(t,e=>{ptrs.delete(e.pointerId);pd=0}));
 svg.addEventListener("click",e=>{if(e.target===svg){sel=null;panel.classList.remove("open");draw()}});
-function jsonld(){return{"@context":{bne:DEF,tfm:"https://xesco-tejedor.github.io/grafo-trinitario/vocab#",rdfs:"http://www.w3.org/2000/01/rdf-schema#"},"@graph":[...N.map(n=>({"@id":"tfm:"+n.id,"rdfs:label":n.l,"tfm:tipo":n.t,"tfm:fuente":n.s,"tfm:propiedades":Object.fromEntries(n.p)})),...L.map((e,i)=>({"@id":"tfm:rel"+(i+1),"tfm:desde":{"@id":"tfm:"+e[0]},"tfm:hacia":{"@id":"tfm:"+e[1]},"rdfs:label":e[3],"tfm:estatus":KINDS[e[2]].n,"rdfs:comment":e[4]}))],"tfm:aviso":"Modelo derivado del TFM. Solo los IRIs bne:C1001, C1002, C1004, C1006 y la propiedad bne:OP1002 están verificados en datos.bne.es/def; el resto de relaciones son del modelo o propuestas."}}
+function jsonld(){return{"@context":{bne:DEF,tfm:"https://xesco-tejedor.github.io/grafo-trinitario/vocab#",rdfs:"http://www.w3.org/2000/01/rdf-schema#"},"@graph":[...N.map(n=>({"@id":"tfm:"+n.id,"rdfs:label":n.l,"tfm:tipo":n.t,"tfm:fuente":n.s,"tfm:propiedades":Object.fromEntries(n.p)})),...L.map((e,i)=>({"@id":"tfm:rel"+(i+1),"tfm:desde":{"@id":"tfm:"+e[0]},"tfm:hacia":{"@id":"tfm:"+e[1]},"rdfs:label":e[3],"tfm:estatus":KINDS[e[2]].n,"rdfs:comment":e[4]}))],"tfm:aviso":"Modelo derivado del TFM. Solo los IRIs bne:C1001, C1002, C1003, C1004, C1006 y las propiedades bne:OP1002, OP2001 y OP3001 están verificados en datos.bne.es/def; el resto de relaciones son del modelo o propuestas."}}
 document.getElementById("exp").onclick=()=>{const b=new Blob([JSON.stringify(jsonld(),null,2)],{type:"application/ld+json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="grafo-trinitario.jsonld";document.body.appendChild(a);a.click();a.remove()};
 const gd=document.getElementById("guide");help.onclick=()=>gd.classList.add("open");gok.onclick=()=>{gd.classList.remove("open");try{localStorage.setItem("gt-guide","1")}catch(e){}};
 layout();draw();fit();addEventListener("resize",()=>{layout();draw();fit()});
