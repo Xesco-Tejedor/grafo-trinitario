@@ -85,14 +85,14 @@ const L=[
 ["A","W1","tfm","incluye obra","La prueba de concepto documenta el Gate 1 (fixity) de las tres obras (§6.4)."],
 ["A","W2","tfm","incluye obra","Ídem; el anexo 11 lo modela como representación PREMIS."],
 ["A","W3","tfm","incluye obra","Ídem."],
-["W2","U","uri","identificador propuesto","objectIdentifier de tipo URI en el XML PREMIS del anexo 11. No verificado."],
+["W2","U","uri","identificador propuesto","objectIdentifier de tipo URI en el XML PREMIS del anexo 11. No verificado.",-70],
 ["A","O","con","Nodo A ≈ Obra","Lectura propuesta en esta herramienta: el AIP describe una obra de software. La BNE no publica esta correspondencia."],
 ["A","E","con","≈ Expresión","Lectura propuesta: el archivo .tzx como realización de la obra. No publicada por la BNE."],
 ["A","I","con","≈ Ejemplar","Lectura propuesta: el fichero concreto con su hash. No publicada por la BNE."],
-["W1","P","con","productora ≈ ent. corporativa","Indescomp (también Opera Soft y Made in Spain) como entidad corporativa. Lectura propuesta, no publicada por la BNE."],
-["O","E","bne","es realizada a través de (OP1002)","Propiedad verificada de la ontología BNE: relaciona una obra con una expresión que la realiza (datos.bne.es/def, OP1002). Es la definición de la propiedad, no un registro concreto."],
-["E","R","bne","está materializada en (OP2001)","Propiedad verificada de la ontología BNE: relaciona una expresión con un recurso, esto es, una materialización física de la expresión (datos.bne.es/def, OP2001). Es la definición de la propiedad, no un registro concreto."],
-["R","I","bne","está ejemplificado por (OP3001)","Propiedad verificada de la ontología BNE: relaciona un recurso con un ejemplar concreto que lo contiene (datos.bne.es/def, OP3001). Es la definición de la propiedad, no un registro concreto."]
+["W1","P","con","productora ≈ ent. corporativa","Indescomp (también Opera Soft y Made in Spain) como entidad corporativa. Lectura propuesta, no publicada por la BNE.",-45],
+["O","E","bne","realizada a través de (OP1002)","Propiedad verificada de la ontología BNE: relaciona una obra con una expresión que la realiza (datos.bne.es/def, OP1002). Es la definición de la propiedad, no un registro concreto.",80],
+["E","R","bne","materializada en (OP2001)","Propiedad verificada de la ontología BNE: relaciona una expresión con un recurso, esto es, una materialización física de la expresión (datos.bne.es/def, OP2001). Es la definición de la propiedad, no un registro concreto.",-30],
+["R","I","bne","ejemplificado por (OP3001)","Propiedad verificada de la ontología BNE: relaciona un recurso con un ejemplar concreto que lo contiene (datos.bne.es/def, OP3001). Es la definición de la propiedad, no un registro concreto.",0]
 ];
 const byId=Object.fromEntries(N.map(n=>[n.id,n]));
 const NS="http://www.w3.org/2000/svg",svg=document.getElementById("svg"),vp=document.getElementById("vp"),gE=document.getElementById("edges"),gN=document.getElementById("nodes"),panel=document.getElementById("panel");
@@ -101,8 +101,8 @@ function el(n,a,p){const e=document.createElementNS(NS,n);for(const k in a)e.set
 function W(){return innerWidth}function H(){return innerHeight}
 const PORT=()=>H()>W()*1.1;
 function layout(){const w=W(),h=H(),cx=w/2,cy=h/2+10,R=Math.min(w,h)*.3;
-if(PORT()){const T={A:[150,190],B:[300,150],C:[300,310],W1:[60,20],W2:[205,25],W3:[75,300],U:[335,45],P:[68,138],O:[75,440],E:[185,520],R:[300,565],I:[325,430]};const top=document.querySelector('header').offsetHeight+28,sx=w/390,sy=Math.min(1.25,Math.max(.75,(h-top-45)/580));N.forEach(n=>{n.x=T[n.id][0]*sx;n.y=top+T[n.id][1]*sy;n.vx=0;n.vy=0});return}
-const py=H()>W()?1.5:1;const pos={A:[cx-R*.9,cy-R*.1*py],B:[cx+R*.9,cy-R*.1*py],C:[cx,cy+R*.85*py],W1:[cx-R*1.7,cy-R*.9],W2:[cx-R*.5,cy-R*1.1],W3:[cx-R*1.7,cy+R*.5],U:[cx+R*.3,cy-R*1.3],O:[cx-R*.9,cy+R*1.1],E:[cx-R*1.7,cy+R*1.3],R:[cx-R*.95,cy+R*1.75],I:[cx-R*.3,cy+R*1.5],P:[cx-R*2.1,cy-R*.2]};
+if(PORT()){const T={A:[150,190],B:[300,150],C:[300,310],W1:[60,20],W2:[205,25],W3:[75,300],U:[335,45],P:[68,138],O:[60,425],E:[185,505],R:[315,570],I:[320,415]};const top=document.querySelector('header').offsetHeight+28,sx=w/390,sy=Math.min(1.25,Math.max(.75,(h-top-45)/580));N.forEach(n=>{n.x=T[n.id][0]*sx;n.y=top+T[n.id][1]*sy;n.vx=0;n.vy=0});return}
+const py=H()>W()?1.5:1;const pos={A:[cx-R*.9,cy-R*.1*py],B:[cx+R*.9,cy-R*.1*py],C:[cx,cy+R*.85*py],W1:[cx-R*1.7,cy-R*.9],W2:[cx-R*.5,cy-R*1.1],W3:[cx-R*1.7,cy+R*.5],U:[cx+R*.3,cy-R*1.3],O:[cx-R*.8,cy+R*1.05],E:[cx-R*1.55,cy+R*1.3],R:[cx-R*.5,cy+R*1.75],I:[cx+R*1.3,cy+R*1.2],P:[cx-R*2.1,cy-R*.2]};
 N.forEach(n=>{[n.x,n.y]=pos[n.id];n.vx=0;n.vy=0})}
 const eEls=[],nEls={};
 L.forEach((e,i)=>{const k=KINDS[e[2]];const p=el("path",{class:"edge",stroke:k.c,"stroke-dasharray":k.d},gE);const t=el("text",{class:"elabel"},gE);t.textContent=e[3];const hit=el("path",{fill:"none",stroke:"transparent","stroke-width":16,style:"cursor:pointer"},gE);hit.onclick=ev=>{ev.stopPropagation();showEdge(i)};eEls.push({p,t,hit,e})});
@@ -112,7 +112,7 @@ if(n.t==="core"){const c=el("text",{y:5,style:"font-size:16px;font-weight:700;fi
 let drag=null,moved=0;g.addEventListener("pointerdown",ev=>{ev.stopPropagation();g.setPointerCapture(ev.pointerId);drag={x:ev.clientX,y:ev.clientY};moved=0});
 g.addEventListener("pointermove",ev=>{if(!drag)return;const dx=(ev.clientX-drag.x)/view.k,dy=(ev.clientY-drag.y)/view.k;moved+=Math.abs(dx)+Math.abs(dy);n.x+=dx;n.y+=dy;drag={x:ev.clientX,y:ev.clientY};draw()});
 g.addEventListener("pointerup",()=>{drag=null;if(moved<6)select(n.id)});g.addEventListener("keydown",ev=>{if(ev.key==="Enter")select(n.id)});nEls[n.id]=g});
-function edgePath(a,b,i){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;const x1=a.x+ux*a.r,y1=a.y+uy*a.r,x2=b.x-ux*b.r,y2=b.y-uy*b.r;const off=((i%3)-1)*14;const mx=(x1+x2)/2-uy*off,my=(y1+y2)/2+ux*off;return{d:`M${x1},${y1} Q${mx},${my} ${x2},${y2}`,mx:(x1+x2+2*mx)/4,my:(y1+y2+2*my)/4}}
+function edgePath(a,b,i){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;const x1=a.x+ux*a.r,y1=a.y+uy*a.r,x2=b.x-ux*b.r,y2=b.y-uy*b.r;const eo=L[i];const off=eo.length>5?eo[5]:((i%3)-1)*14;const mx=(x1+x2)/2-uy*off,my=(y1+y2)/2+ux*off;return{d:`M${x1},${y1} Q${mx},${my} ${x2},${y2}`,mx:(x1+x2+2*mx)/4,my:(y1+y2+2*my)/4}}
 function connected(id){const s=new Set([id]);L.forEach(e=>{if(e[0]===id)s.add(e[1]);if(e[1]===id)s.add(e[0])});return s}
 function draw(){vp.setAttribute("transform",`translate(${view.x},${view.y}) scale(${view.k})`);const q=document.getElementById("q").value.trim().toLowerCase();const nb=sel?connected(sel):null;
 eEls.forEach((o,i)=>{const [a,b,k]=o.e,pa=edgePath(byId[a],byId[b],i);o.p.setAttribute("d",pa.d);o.hit.setAttribute("d",pa.d);o.t.setAttribute("x",pa.mx);o.t.setAttribute("y",pa.my-4);const vis=on.has(k);o.p.style.display=o.hit.style.display=vis?"":"none";const showL=vis&&(!PORT()||view.k>=1.6);o.t.style.display=showL?"":"none";o.p.classList.toggle("dim",!!(nb&&!(a===sel||b===sel)))});
